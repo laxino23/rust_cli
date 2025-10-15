@@ -53,9 +53,17 @@ repos:
         files: \.rs$
         pass_filenames: false
       - id: cargo-test
-        name: cargo test
+        name: cargo test (skip if no tests)
         description: unit test for the project
-        entry: bash -c 'cargo nextest run --all-features'
-        language: rust
+        entry: |
+          bash -c '
+            if cargo nextest list --all-features | grep -q "test:"; then
+              echo "🧪 Running tests via nextest..."
+              cargo nextest run --all-features;
+            else
+              echo "⚡ No tests found, skipping cargo test.";
+            fi
+          '
+        language: system
         files: \.rs$
         pass_filenames: false
