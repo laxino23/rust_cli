@@ -2,6 +2,8 @@
 use clap::Parser;
 use rcli::{process_csv, Opts, SubCommand};
 
+// cl takes arguments from command line
+// csv -> (deserialize) -> struct -> (serialize) -> json
 fn main() -> anyhow::Result<()> {
     let opts: Opts = Opts::parse();
 
