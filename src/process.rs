@@ -10,7 +10,13 @@ pub fn process_csv(input: &str, output: &str, format: OutputFormat) -> anyhow::R
 
     for result in reader.records() {
         let record = result?;
-        let json_value = headers.iter().zip(record.iter()).collect::<Value>();
+        let json_value = serde_json::Value::Object(
+            headers
+                .iter()
+                .zip(record.iter())
+                .map(|(h, v)| (h.to_string(), serde_json::Value::String(v.to_string())))
+                .collect(),
+        );
         container.push(json_value);
     }
     let content = match format.into() {
