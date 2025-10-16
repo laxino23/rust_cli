@@ -1,20 +1,7 @@
 use crate::opts::OutputFormat;
 use csv::Reader;
-// use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fs;
-
-// #[derive(Debug, Serialize, Deserialize)]
-// #[serde(rename_all = "PascalCase")] // first letter uppercase
-// pub struct Player {
-//     pub name: String,
-//     pub position: String,
-//     #[serde(rename = "DOB")]
-//     pub dob: String,
-//     pub nationality: String,
-//     #[serde(rename = "Kit Number")]
-//     pub kit: u8,
-// }
 
 pub fn process_csv(input: &str, output: &str, format: OutputFormat) -> anyhow::Result<()> {
     let mut reader = Reader::from_path(input)?;
