@@ -43,7 +43,11 @@ pub fn process_gen_pass(len: u8, upper: bool, lower: bool, num: bool, sym: bool)
     // print password strength
     let estimate = zxcvbn(&password, &[]);
     // eprint!("Password strength: {:?}\n", estimate.score());
-    Ok(password + estimate.score().to_string().as_str())
+    Ok(format!(
+        "password: {}\nstrength: {} \n(reference range: 0 (too guessable) - 4 (very unguessable))",
+        password,
+        estimate.score()
+    ))
 }
 
 fn random_from_set(charset: &str) -> char {
