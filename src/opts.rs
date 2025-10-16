@@ -1,5 +1,13 @@
-use clap::Parser;
+use clap::{ArgAction::SetFalse, Parser};
 use std::{path::Path, str::FromStr};
+
+// macro_rules! bool_flag {
+//     ($field:ident, $desc_on:expr, $desc_off:expr) => {
+//         #[arg(long, help = $desc_on, default_value_t = true, action = ArgAction::SetTrue)]
+//         #[arg(long = concat!("no-", stringify!($field)), help = $desc_off, action = ArgAction::SetFalse)]
+//         pub $field: bool
+//     };
+// }
 
 #[derive(Debug, Parser)] // from macro get traits
 #[command(name = "rcli", version, author, about, long_about = None)]
@@ -12,6 +20,8 @@ pub struct Opts {
 pub enum SubCommand {
     #[command(name = "csv", about = "Show csv, or convert CSV to other formats")]
     Csv(CsvOpts),
+    #[command(name = "genpass", about = "Generate a random password")]
+    GenPass(GenPassOpts),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -28,6 +38,28 @@ impl From<OutputFormat> for &str {
             OutputFormat::Toml => "toml",
         }
     }
+}
+
+#[derive(Debug, Parser)]
+pub struct GenPassOpts {
+    #[arg(long, help = "Length of the password", default_value_t = 16)]
+    pub length: u8,
+
+    #[arg(long, default_value_t = true, help = "Include uppercase letters", action = SetTrue)]
+    #[arg(long = "no-uppercase", action = SetFalse, help = "Exclude uppercase letters")]
+    pub uppercase: bool,
+
+    #[arg(long, default_value_t = true, help = "Include lowercase letters", action = SetTrue)]
+    #[arg(long = "no-lowercase", action = SetFalse, help = "Exclude lowercase letters")]
+    pub lowercase: bool,
+
+    #[arg(long, default_value_t = true, help = "Include numbers", action = SetTrue)]
+    #[arg(long = "no-numbers", action = SetFalse, help = "Exclude numbers")]
+    pub numbers: bool,
+
+    #[arg(long, default_value_t = true, help = "Include symbols", action = SetTrue)]
+    #[arg(long = "no-symbols", action = SetFalse, help = "Exclude symbols")]
+    pub symbols: bool,
 }
 
 impl TryFrom<&str> for OutputFormat {
