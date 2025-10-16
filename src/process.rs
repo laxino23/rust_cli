@@ -1,29 +1,73 @@
+use crate::opts::OutputFormat;
 use csv::Reader;
-use serde::{Deserialize, Serialize};
+// use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::fs;
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")] // first letter uppercase
-pub struct Player {
-    pub name: String,
-    pub position: String,
-    #[serde(rename = "DOB")]
-    pub dob: String,
-    pub nationality: String,
-    #[serde(rename = "Kit Number")]
-    pub kit: u8,
-}
+// #[derive(Debug, Serialize, Deserialize)]
+// #[serde(rename_all = "PascalCase")] // first letter uppercase
+// pub struct Player {
+//     pub name: String,
+//     pub position: String,
+//     #[serde(rename = "DOB")]
+//     pub dob: String,
+//     pub nationality: String,
+//     #[serde(rename = "Kit Number")]
+//     pub kit: u8,
+// }
 
-pub fn process_csv(input: &str, output: &str) -> anyhow::Result<()> {
+pub fn process_csv(input: &str, output: &str, format: OutputFormat) -> anyhow::Result<()> {
     let mut reader = Reader::from_path(input)?;
     let mut container = Vec::with_capacity(128);
+    let headers = reader.headers()?.clone();
 
-    for result in reader.deserialize::<Player>() {
+    for result in reader.records() {
         let record = result?;
-        container.push(record);
+        let json_value = headers.iter().zip(record.iter()).collect::<Value>();
+        container.push(json_value);
     }
+    let content = match format.into() {
+        "json" => serde_json::to_string_pretty(&container)?,
+        "yaml" => serde_yaml::to_string(&container)?,
+        "toml" => {
+            let toml_values: Vec<toml::Value> = container.iter().map(json_to_toml).collect();
+            // TOML 不支持顶层是数组 → 包一层 table
+            let mut root = toml::map::Map::new();
+            root.insert("data".to_string(), toml::Value::Array(toml_values));
+            toml::to_string(&root)?
+        }
+        _ => unreachable!("Unsupported format"), // This should never happen due to prior validation
+    };
 
-    let json = serde_json::to_string_pretty(&container)?;
-    fs::write(output, json)?;
+    // let json = serde_json::to_string_pretty(&container)?;
+    fs::write(output, content)?;
     Ok(())
+}
+
+fn json_to_toml(json_str: &Value) -> toml::Value {
+    match json_str {
+        Value::Null => toml::Value::String("null".to_string()),
+        Value::Bool(b) => toml::Value::Boolean(*b),
+        Value::Number(n) => {
+            if let Some(i) = n.as_i64() {
+                toml::Value::Integer(i)
+            } else if let Some(f) = n.as_f64() {
+                toml::Value::Float(f)
+            } else {
+                toml::Value::String(n.to_string())
+            }
+        }
+        Value::String(s) => toml::Value::String(s.clone()),
+        Value::Array(arr) => {
+            let toml_array: Vec<toml::Value> = arr.iter().map(json_to_toml).collect();
+            toml::Value::Array(toml_array)
+        }
+        Value::Object(obj) => {
+            let toml_table: toml::value::Table = obj
+                .iter()
+                .map(|(k, v)| (k.clone(), json_to_toml(v)))
+                .collect();
+            toml::Value::Table(toml_table)
+        }
+    }
 }

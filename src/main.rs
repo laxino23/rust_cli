@@ -9,7 +9,10 @@ fn main() -> anyhow::Result<()> {
 
     match opts.cmd {
         SubCommand::Csv(opts) => {
-            process_csv(&opts.input, &opts.output)?;
+            let output: String = opts.output.clone().unwrap_or_else(|| {
+                format!("output.{}", <&str>::from(opts.format)) // from impl
+            });
+            process_csv(&opts.input, &output, opts.format)?;
         }
     }
     Ok(())
