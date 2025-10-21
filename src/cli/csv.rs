@@ -1,4 +1,4 @@
-use super::verify_input_file;
+use super::verify_file;
 use clap::Parser;
 use std::str::FromStr;
 
@@ -49,7 +49,7 @@ pub struct CsvOpts {
         short,
         long,
         help = "Input file path, if not specified, read from stdin",
-        value_parser = verify_input_file,
+        value_parser = verify_file,
     )]
     pub input: String,
 

@@ -54,4 +54,5 @@ allow = [
 exceptions = [
     # Use exceptions for these as they only have a single user
     { allow = ["CDLA-Permissive-2.0"], crate = "webpki-roots" },
+    { crate = "arrayref", allow = ["BSD-2-Clause"] }
 ]

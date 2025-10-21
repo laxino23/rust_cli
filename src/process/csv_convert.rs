@@ -3,7 +3,11 @@ use csv::Reader;
 use serde_json::Value;
 use std::fs;
 
-pub fn process_csv(input: &str, output: &str, format: OutputFormat) -> anyhow::Result<()> {
+pub fn process_csv(
+    input: &str,
+    output: &str,
+    format: OutputFormat,
+) -> anyhow::Result<()> {
     let mut reader = Reader::from_path(input)?;
     let mut container = Vec::with_capacity(128);
     let headers = reader.headers()?.clone();
@@ -14,7 +18,9 @@ pub fn process_csv(input: &str, output: &str, format: OutputFormat) -> anyhow::R
             headers
                 .iter()
                 .zip(record.iter())
-                .map(|(h, v)| (h.to_string(), serde_json::Value::String(v.to_string())))
+                .map(|(h, v)| {
+                    (h.to_string(), serde_json::Value::String(v.to_string()))
+                })
                 .collect(),
         );
         container.push(json_value);
@@ -23,7 +29,8 @@ pub fn process_csv(input: &str, output: &str, format: OutputFormat) -> anyhow::R
         "json" => serde_json::to_string_pretty(&container)?,
         "yaml" => serde_yaml::to_string(&container)?,
         "toml" => {
-            let toml_values: Vec<toml::Value> = container.iter().map(json_to_toml).collect();
+            let toml_values: Vec<toml::Value> =
+                container.iter().map(json_to_toml).collect();
             // TOML 不支持顶层是数组 → 包一层 table
             let mut root = toml::map::Map::new();
             root.insert("data".to_string(), toml::Value::Array(toml_values));
@@ -52,7 +59,8 @@ fn json_to_toml(json_str: &Value) -> toml::Value {
         }
         Value::String(s) => toml::Value::String(s.clone()),
         Value::Array(arr) => {
-            let toml_array: Vec<toml::Value> = arr.iter().map(json_to_toml).collect();
+            let toml_array: Vec<toml::Value> =
+                arr.iter().map(json_to_toml).collect();
             toml::Value::Array(toml_array)
         }
         Value::Object(obj) => {

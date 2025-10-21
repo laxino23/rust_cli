@@ -1,51 +1,37 @@
 use crate::cli::base64::Base64Format;
+use crate::utils::{read_input, write_output};
 use anyhow::Ok;
 use base64::{
-    engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD},
     Engine as _,
-};
-use std::{
-    fs::File,
-    io::{stdin, Read, Write},
+    engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD},
 };
 
-pub fn process_encode(input: &str, format: Base64Format) -> anyhow::Result<()> {
-    let buf = read_input(input)?;
+pub fn process_encode(
+    input: &str,
+    format: Base64Format,
+) -> anyhow::Result<String> {
+    let buf = read_input(input, true)?;
     let encoder = get_encoder(format);
     let encode = encoder(&buf);
-    println!("{}", encode);
-    Ok(())
+    Ok(encode)
 }
 
-pub fn process_decode(input: &str, format: Base64Format) -> anyhow::Result<()> {
-    let buf = read_input(input)?;
+pub fn process_decode(
+    input: &str,
+    format: Base64Format,
+) -> anyhow::Result<Vec<u8>> {
+    let buf = read_input(input, true)?;
     let buf_str = String::from_utf8_lossy(&buf).trim().to_string();
     let decoder = get_decoder(format);
     let decode = decoder(&buf_str)?;
     // NOTE the result may not be valid UTF-8 string
     write_output(&decode)?;
-    Ok(())
+    Ok(decode)
 }
 
-fn read_input(input: &str) -> anyhow::Result<Vec<u8>> {
-    let mut reader: Box<dyn Read> = if input == "-" {
-        Box::new(stdin())
-    } else {
-        Box::new(File::open(input)?)
-    };
-    let mut buf = Vec::new();
-    reader.read_to_end(&mut buf)?;
-    Ok(buf)
-}
-
-fn write_output(output: &[u8]) -> anyhow::Result<()> {
-    let stdout = std::io::stdout();
-    let mut handle = stdout.lock();
-    handle.write_all(output)?;
-    Ok(())
-}
-
-fn get_decoder(format: Base64Format) -> impl Fn(&str) -> anyhow::Result<Vec<u8>> {
+fn get_decoder(
+    format: Base64Format,
+) -> impl Fn(&str) -> anyhow::Result<Vec<u8>> {
     move |s: &str| {
         let value = match format {
             Base64Format::Standard => STANDARD.decode(s)?,
@@ -103,7 +89,10 @@ mod tests {
     }
 
     /// 测试用：直接解码字符串
-    fn decode_str(input: &str, format: Base64Format) -> anyhow::Result<Vec<u8>> {
+    fn decode_str(
+        input: &str,
+        format: Base64Format,
+    ) -> anyhow::Result<Vec<u8>> {
         let decoder = super::get_decoder(format);
         decoder(input)
     }
