@@ -1,7 +1,8 @@
 use std::str::FromStr;
 
-use super::verify_file;
 use clap::Parser;
+
+use super::verify_file;
 
 #[derive(Debug, Parser)]
 pub enum Base64SubCommand {

@@ -1,8 +1,9 @@
-use anyhow::{Ok, Result as aResult};
 use std::{
     fs::File,
     io::{Read, Write, stdin},
 };
+
+use anyhow::{Ok, Result as aResult};
 
 pub fn read_input(input: &str, trim: bool) -> aResult<Vec<u8>> {
     let mut reader: Box<dyn Read> = if input == "-" {

@@ -1,6 +1,8 @@
-use super::verify_file;
-use clap::Parser;
 use std::str::FromStr;
+
+use clap::Parser;
+
+use super::verify_file;
 
 // MARK - CSV OPTIONS
 #[derive(Debug, Clone, Copy)]

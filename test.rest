@@ -1,0 +1,5 @@
+### text index
+GET http://localhost:8080/cargo.toml
+
+### text index2
+GET http://localhost:8080/not_found.txt

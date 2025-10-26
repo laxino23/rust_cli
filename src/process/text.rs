@@ -1,16 +1,16 @@
 // https://github.com/rust-cc/awesome-cryptography-rust
 
 #![allow(dead_code)]
-use std::io::Read;
+use std::{io::Read, path::Path};
 
-use crate::cli::text::TextSignFormat;
-use crate::process::gen_pass::process_gen_pass;
-use crate::utils::read_input;
 use anyhow::Result as aResult;
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use ed25519_dalek::{Signer, SigningKey, Verifier, VerifyingKey};
 
-use std::path::Path;
+use crate::{
+    cli::text::TextSignFormat, process::gen_pass::process_gen_pass,
+    utils::read_input,
+};
 
 pub trait TextSignable {
     fn sign(&self, reader: &mut dyn Read) -> aResult<Vec<u8>>;

@@ -1,17 +1,22 @@
 use std::fs;
 
-// rcli csv -i input.csv -o output.json -- header -d ','
 use clap::Parser;
-use rcli::{Base64SubCommand, process_decode, process_encode};
-use rcli::{Opts, SubCommand, process_csv, process_gen_pass};
+
 use rcli::{
+    Base64SubCommand, HttpSubCommand, Opts, SubCommand,
     TextSignFormat::{Blake3, Ed25519},
-    TextSubCommand, process_key_generate, process_sign, process_verify,
+    TextSubCommand, process_csv, process_decode, process_encode,
+    process_gen_pass, process_http_server, process_key_generate, process_sign,
+    process_verify,
 };
 
 // cl takes arguments from command line
 // csv -> (deserialize) -> struct -> (serialize) -> json
-fn main() -> anyhow::Result<()> {
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // 初始化 tracing_subscriber 日志格式化器，用于日志输出
+    tracing_subscriber::fmt::init();
     let opts: Opts = Opts::parse();
 
     match opts.cmd {
@@ -70,6 +75,11 @@ fn main() -> anyhow::Result<()> {
                         fs::write(&name, &key[1])?;
                     }
                 }
+            }
+        },
+        SubCommand::Http(subcmd) => match subcmd {
+            HttpSubCommand::Server(opts) => {
+                process_http_server(opts.directory, opts.port).await?;
             }
         },
     }

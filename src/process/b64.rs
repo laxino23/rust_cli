@@ -1,9 +1,12 @@
-use crate::cli::base64::Base64Format;
-use crate::utils::{read_input, write_output};
 use anyhow::Ok;
 use base64::{
     Engine as _,
     engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD},
+};
+
+use crate::{
+    cli::base64::Base64Format,
+    utils::{read_input, write_output},
 };
 
 pub fn process_encode(

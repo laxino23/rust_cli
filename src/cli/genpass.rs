@@ -1,5 +1,4 @@
-use clap::Parser;
-use clap::builder::ArgAction::SetFalse;
+use clap::{Parser, builder::ArgAction::SetFalse};
 
 // MARK - GENPASS OPTIONS
 #[derive(Debug, Parser)]

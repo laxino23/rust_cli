@@ -1,7 +1,9 @@
-use crate::cli::csv::OutputFormat;
+use std::fs;
+
 use csv::Reader;
 use serde_json::Value;
-use std::fs;
+
+use crate::cli::csv::OutputFormat;
 
 pub fn process_csv(
     input: &str,

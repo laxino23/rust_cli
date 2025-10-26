@@ -1,15 +1,17 @@
 pub mod base64;
 pub mod csv;
 pub mod genpass;
+pub mod http;
 pub mod text;
 
-use clap::Parser;
 use std::path::{Path, PathBuf};
 
-use crate::cli::base64::Base64SubCommand;
-use crate::cli::csv::CsvOpts;
-use crate::cli::genpass::GenPassOpts;
-use crate::cli::text::TextSubCommand;
+use clap::Parser;
+
+use crate::cli::{
+    base64::Base64SubCommand, csv::CsvOpts, genpass::GenPassOpts,
+    http::HttpSubCommand, text::TextSubCommand,
+};
 
 #[derive(Debug, Parser)] // from macro get traits
 #[command(name = "rcli", version, author, about, long_about = None)]
@@ -31,6 +33,8 @@ pub enum SubCommand {
     Base64(Base64SubCommand),
     #[command(subcommand)]
     Text(TextSubCommand),
+    #[command(subcommand)]
+    Http(HttpSubCommand),
 }
 
 pub fn verify_file(filename: &str) -> Result<String, String> {
